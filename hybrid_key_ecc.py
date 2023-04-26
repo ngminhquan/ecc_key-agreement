@@ -69,10 +69,11 @@ class key_agreement(object):
         k_m_test = self.present_decrypt(_cp)
         k_m_test = bytes_to_long(k_m_test)
 
+
         #verify
         if k_m_test == self._k_m:
             print('VALID k_m')
-            if ssk_new == bytes_to_long(self.ssk):
+            if ssk_new == self.ssk:
                 print("VALID ssk")
                 return ssk_new
             else:
