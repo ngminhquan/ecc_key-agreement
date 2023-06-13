@@ -3,15 +3,17 @@ from tinyec import registry
 import random
 import numpy as np
 from hash_encrypt import Present, long_to_bytes, bytes_to_long, hash_function
-
+import time
 
 # take sample parameters
 samplecurve = registry.get_curve("brainpoolP256r1")
 p = samplecurve.field.p
+print(p)
 a = samplecurve.a
 b = samplecurve.b
 x_g = samplecurve.g.x
 y_g = samplecurve.g.y
+print(hex(x_g), y_g)
 n = samplecurve.field.n
 curve = field.Curve(a, b, p, n, x_g, y_g)
 
@@ -26,7 +28,7 @@ class key_agreement(object):
         self._pu_b:int = pu_b
         self._k_m = k_m
 
-    #encrypt & decrypt, use in cmac
+        #encrypt & decrypt, use in cmac
     def present_encrypt(self, block: bytes) -> bytes:
         key = Present(self.ssk)
         return key.encrypt(block)
@@ -42,7 +44,7 @@ class key_agreement(object):
             return 'INVALID user'
         else:
             return self._pu_b
-        
+            
     def gen_ssk(self):      #run at user A
         #ssk = chebyshev(alpha_a+alpha_b-k_m, x) mod p
         ssk = (self._alpha_a - self._k_m) * curve.g + self._pu_b
@@ -57,7 +59,8 @@ class key_agreement(object):
 
         #find s = chebyshev(alpha_a - k_m - cp, x) mod p
         self._s = (self._alpha_a - self._k_m - self._cp_s) * curve.g
-        return self._s, self._cp
+        #return self._s, self._cp
+        return 0
 
     def recover_ssk(self):
         #find ssk' from s and cp
@@ -71,6 +74,8 @@ class key_agreement(object):
 
 
         #verify
+        return 0
+        '''
         if k_m_test == self._k_m:
             print('VALID k_m')
             if ssk_new == self.ssk:
@@ -79,20 +84,20 @@ class key_agreement(object):
             else:
                 return 'INVALID ssk'
         else:
-            return 'INVALID k_m'
-'''
-id_a = b'user_a'
-id_b = b'user_b'
-nonce_i = b'nonce'
-alpha_a = 567040
-alpha_b = 230882
-pu_b = 35903
-x = 842
-p = 46957
-k_m = hash_function(id_b + id_a + nonce_i)[:2]
-k_m = bytes_to_long(k_m)
-'''
-
+                return 'INVALID k_m'
+        '''
+    '''
+    id_a = b'user_a'
+    id_b = b'user_b'
+    nonce_i = b'nonce'
+    alpha_a = 567040
+    alpha_b = 230882
+    pu_b = 35903
+    x = 842
+    p = 46957
+    k_m = hash_function(id_b + id_a + nonce_i)[:2]
+    k_m = bytes_to_long(k_m)
+    '''
 # example key pairs
 dA =b'81DB1EE100150FF2EA338D708271BE38300CB54241D79950F77B063039804F1D'
 
@@ -120,8 +125,23 @@ k_m = bytes_to_long(k_m)
 
 hybrid_key = key_agreement(id_a, id_b, nonce_i, priKey1, priKey2, pubKey2, k_m)
 
-a = hybrid_key.verify_user_A()
-b = hybrid_key.gen_ssk()
-c = hybrid_key.recover_ssk()
 
-print(c)
+
+count = 100
+avg = 0
+for i in range(count):
+    start_time = time.time()
+
+    # Đoạn code cần đo thời gian thực thi
+    #a = hybrid_key.verify_user_A()
+    b = hybrid_key.gen_ssk()
+    c = hybrid_key.recover_ssk()
+
+    #print(b)
+    end_time = time.time()
+
+    duration = end_time - start_time
+    avg += duration
+
+avg /= count
+print("Thời gian chạy: {:.5f} giây".format(avg))
